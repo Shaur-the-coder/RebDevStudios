@@ -5,8 +5,36 @@
 <title>RobDev Studio</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
-body { font-family: Arial; text-align:center; margin-top:50px; }
-button { padding:10px 20px; font-size:16px; }
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    background-color: #fff;
+    transition: background-color 0.5s;
+}
+
+#g_id_onload, .g_id_signin {
+    margin-top: 50px;
+}
+
+#loggedInBanner {
+    display: none;
+    color: white;
+    font-size: 24px;
+    margin-top: 50px;
+}
+
+#userPfp {
+    display: none;
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
 </style>
 </head>
 <body>
@@ -14,18 +42,39 @@ button { padding:10px 20px; font-size:16px; }
 <h1>Welcome to RobDev Studio!</h1>
 <p>Create and share Roblox designs easily.</p>
 
-<div id="g_id_onload"
-     data-client_id="231019549680-mqoqrf0ipj8cpbvskoi2fhd3dp8gcgqn.apps.googleusercontent.com"
-     data-auto_prompt="false">
-</div>
-
+<div id="g_id_onload" data-client_id="231019549680-mqoqrf0ipj8cpbvskoi2fhd3dp8gcgqn.apps.googleusercontent.com" data-auto_prompt="false"></div>
 <div class="g_id_signin"></div>
+
+<img id="userPfp" src="" alt="User Profile Picture">
+<div id="loggedInBanner"></div>
 
 <script>
 function handleCredentialResponse(response) {
-    console.log("User token:", response.credential);
-    // Later: send token to backend to get user info & save session
-    alert("Signed in! Ready to build your Roblox designs.");
+    // Decode Google JWT
+    const base64Url = response.credential.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64));
+
+    const username = payload.name || payload.email;
+    const pfpUrl = payload.picture || "";
+
+    // Change page layout
+    document.body.style.backgroundColor = "#333"; // dark grey
+    document.querySelector("h1").style.display = "none"; // hide original header
+    document.querySelector("p").style.display = "none";  // hide original text
+    document.querySelector(".g_id_signin").style.display = "none"; // hide button
+
+    // Show logged-in banner
+    const banner = document.getElementById("loggedInBanner");
+    banner.innerText = `You are now logged in, ${username}`;
+    banner.style.display = "block";
+
+    // Show user profile picture
+    const pfp = document.getElementById("userPfp");
+    if(pfpUrl){
+        pfp.src = pfpUrl;
+        pfp.style.display = "block";
+    }
 }
 
 window.onload = () => {
@@ -42,3 +91,4 @@ window.onload = () => {
 
 </body>
 </html>
+

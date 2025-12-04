@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RobDev Studio</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<style>
+body { font-family: Arial; text-align:center; margin-top:50px; }
+button { padding:10px 20px; font-size:16px; }
+</style>
+</head>
+<body>
+
+<h1>Welcome to RobDev Studio!</h1>
+<p>Create and share Roblox designs easily.</p>
+
+<div id="g_id_onload"
+     data-client_id="YOUR_GOOGLE_CLIENT_ID"
+     data-auto_prompt="false">
+</div>
+
+<div class="g_id_signin"></div>
+
+<script>
+function handleCredentialResponse(response) {
+    console.log("User token:", response.credential);
+    // Later: send token to backend to get user info & save session
+    alert("Signed in! Ready to build your Roblox designs.");
+}
+
+window.onload = () => {
+    google.accounts.id.initialize({
+        client_id: "YOUR_GOOGLE_CLIENT_ID",
+        callback: handleCredentialResponse
+    });
+    google.accounts.id.renderButton(
+        document.querySelector(".g_id_signin"),
+        { theme: "outline", size: "large" }
+    );
+};
+</script>
+
+</body>
+</html>

